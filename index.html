@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hifzul Quran - Quran Hifz Made Easy</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .scroll-container {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .arabic-text {
+            direction: rtl;
+            font-size: 2.25rem;
+            line-height: 4rem;
+            text-align: right;
+            font-weight: 700;
+        }
+
+        .font-amiri {
+            font-family: 'Amiri', serif;
+        }
+
+        .font-scheherazade {
+            font-family: 'Scheherazade New', serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-2xl">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Hifzul Quran</h1>
+        <p class="text-center text-gray-600 mb-8">Select a Surah and a verse range to listen to a repetitive recitation.
+        </p>
+
+        <div id="loading" class="text-center text-gray-500 hidden mb-4">
+            <svg class="animate-spin h-8 w-8 text-gray-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+            <span class="mt-2 text-sm block">Loading...</span>
+        </div>
+
+        <div id="main-content" class="space-y-6 hidden">
+            <!-- Reciter Selection -->
+            <div>
+                <label for="reciter-select" class="block text-sm font-medium text-gray-700 mb-2">Select Reciter</label>
+                <select id="reciter-select"
+                    class="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300">
+                    <!-- Reciter options will be populated by JavaScript -->
+                </select>
+            </div>
+
+            <!-- Surah Selection -->
+            <div>
+                <label for="surah-select" class="block text-sm font-medium text-gray-700 mb-2">Select Surah</label>
+                <select id="surah-select"
+                    class="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300">
+                    <!-- Surah options will be populated by JavaScript -->
+                </select>
+            </div>
+
+            <!-- Verse Range -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="start-verse" class="block text-sm font-medium text-gray-700 mb-2">Start Verse</label>
+                    <input type="number" id="start-verse" value="1" min="1"
+                        class="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300" />
+                </div>
+                <div>
+                    <label for="end-verse" class="block text-sm font-medium text-gray-700 mb-2">End Verse</label>
+                    <input type="number" id="end-verse" value="1" min="1"
+                        class="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300" />
+                </div>
+            </div>
+
+            <!-- Repetition Options -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="verse-repeat-count" class="block text-sm font-medium text-gray-700 mb-2">Repeat Each
+                        Verse</label>
+                    <input type="number" id="verse-repeat-count" value="1" min="1"
+                        class="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300" />
+                </div>
+                <div>
+                    <label for="range-repeat-count" class="block text-sm font-medium text-gray-700 mb-2">Repeat Entire
+                        Range</label>
+                    <input type="number" id="range-repeat-count" value="1" min="1"
+                        class="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300" />
+                </div>
+            </div>
+
+            <!-- Playback Speed Control -->
+            <div>
+                <label for="playback-speed-select" class="block text-sm font-medium text-gray-700 mb-2">Playback
+                    Speed</label>
+                <select id="playback-speed-select"
+                    class="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300">
+                    <option value="0.5">0.5x</option>
+                    <option value="0.75">0.75x</option>
+                    <option value="0.95">0.95x</option>
+                    <option value="1" selected>Normal</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="1.75">1.75x</option>
+                    <option value="2">2x</option>
+                </select>
+            </div>
+
+            <!-- Arabic Script Selection -->
+            <div>
+                <label for="arabic-script-select" class="block text-sm font-medium text-gray-700 mb-2">Arabic
+                    Style</label>
+                <select id="arabic-script-select"
+                    class="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300">
+                    <option value="quran-uthmani" selected>Uthmani (Madani)</option>
+                    <option value="quran-indopak">Indopak</option>
+                </select>
+            </div>
+
+            <!-- Cumulative Recitation Option -->
+            <div class="flex items-center pt-2">
+                <input type="checkbox" id="cumulative-recitation"
+                    class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                <label for="cumulative-recitation" class="ml-3 block text-sm font-medium text-gray-700">
+                    <span class="font-bold text-orange-500">Cumulative Recitation:</span> (For Better Memorization,
+                    previous verses are repeated)
+                </label>
+            </div>
+
+            <!-- Current Verse Display and Text -->
+            <div class="text-center">
+                <div id="current-verse-display"
+                    class="bg-blue-50 rounded-lg p-4 font-bold text-gray-700 text-lg hidden">
+                    Surah <span id="current-surah-number"></span>, Verse <span id="current-verse-number"></span>
+                </div>
+                <div id="verse-text-container" class="mt-4 hidden">
+                    <p id="arabic-text" class="arabic-text text-gray-800 leading-relaxed"></p>
+                    <p id="english-text" class="mt-2 text-gray-600 text-sm italic"></p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
+                <button id="play-btn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition duration-300 hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.26a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play
+                </button>
+                <button id="pause-btn"
+                    class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition duration-300 hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9h4v6h-4z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 21a9 9 0 110-18 9 9 0 010 18z" />
+                    </svg>
+                    Pause
+                </button>
+                <button id="stop-btn"
+                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transform transition duration-300 hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9h4v6h-4z" />
+                    </svg>
+                    Stop
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const surahSelect = document.getElementById('surah-select');
+        const reciterSelect = document.getElementById('reciter-select');
+        const startVerseInput = document.getElementById('start-verse');
+        const endVerseInput = document.getElementById('end-verse');
+        const verseRepeatCountInput = document.getElementById('verse-repeat-count');
+        const rangeRepeatCountInput = document.getElementById('range-repeat-count');
+        const playbackSpeedSelect = document.getElementById('playback-speed-select');
+        const arabicScriptSelect = document.getElementById('arabic-script-select');
+        const cumulativeRecitationCheckbox = document.getElementById('cumulative-recitation'); // Re-introduced
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const currentVerseDisplay = document.getElementById('current-verse-display');
+        const currentSurahNumberSpan = document.getElementById('current-surah-number');
+        const currentVerseNumberSpan = document.getElementById('current-verse-number');
+        const verseTextContainer = document.getElementById('verse-text-container');
+        const arabicTextSpan = document.getElementById('arabic-text');
+        const englishTextSpan = document.getElementById('english-text');
+        const loadingDiv = document.getElementById('loading');
+        const mainContentDiv = document.getElementById('main-content');
+
+        const API_BASE_URL = 'https://api.alquran.cloud/v1';
+
+        let isPlaying = false;
+        let isPaused = false;
+        let stopPlayback = false;
+        let currentAudio = null;
+        let lastRangeRepeatValue = 1; // Store the last user-set value
+
+        const allSurahs = [];
+        const reciters = [];
+
+        // Helper function for fetching data
+        const fetchData = async (url) => {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+                return null;
+            }
+        };
+
+        // Update button states based on playback state
+        const updateButtonStates = () => {
+            playBtn.disabled = isPlaying && !isPaused;
+            pauseBtn.disabled = !isPlaying || isPaused;
+            stopBtn.disabled = !isPlaying && !isPaused;
+        };
+
+        // Helper function to play a single verse (handles fetching text and audio)
+        const playSingleVerse = async (v, surahNumber, reciterIdentifier, arabicScript, playbackSpeed) => {
+            if (stopPlayback || isPaused) return;
+
+            // Fetch text and update display
+            currentSurahNumberSpan.textContent = surahNumber;
+            currentVerseNumberSpan.textContent = v;
+
+            const arabicTextUrl = `${API_BASE_URL}/ayah/${surahNumber}:${v}/${arabicScript}`;
+            const englishTextUrl = `${API_BASE_URL}/ayah/${surahNumber}:${v}/en.sahih`;
+
+            const [arabicData, englishData] = await Promise.all([
+                fetchData(arabicTextUrl),
+                fetchData(englishTextUrl)
+            ]);
+
+            // Display text for the single focused verse
+            arabicTextSpan.textContent = arabicData?.data?.text || "Arabic text not available.";
+            englishTextSpan.textContent = englishData?.data?.text || "English translation not available.";
+
+            // Fetch audio and play
+            const audioUrl = `${API_BASE_URL}/ayah/${surahNumber}:${v}/${reciterIdentifier}`;
+            const audioData = await fetchData(audioUrl);
+
+            if (audioData?.data?.audio) {
+                await new Promise((resolve, reject) => {
+                    if (stopPlayback || isPaused) {
+                        resolve();
+                        return;
+                    }
+                    if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio.currentTime = 0;
+                    }
+                    currentAudio = new Audio(audioData.data.audio);
+                    currentAudio.playbackRate = playbackSpeed;
+                    currentAudio.play();
+                    currentAudio.addEventListener('ended', resolve);
+                    currentAudio.addEventListener('error', (e) => {
+                        console.error("Audio playback error:", e);
+                        reject(e);
+                    });
+                });
+            } else {
+                console.error(`Audio not found for Surah ${surahNumber}, Verse ${v}.`);
+            }
+        };
+
+
+        // Initialize the app with data
+        const initializeApp = async () => {
+            loadingDiv.classList.remove('hidden');
+            mainContentDiv.classList.add('hidden');
+
+            // Fetch reciters
+            const preferredReciters = [
+                "Abdul Basit",
+                "Abdullah Basfar",
+                "Abdurrahmaan As-Sudais",
+                "Abdul Samad",
+                "Abu Bakr Ash-Shaatree",
+                "Ahmed ibn Ali al-Ajamy",
+                "Alafasy",
+                "Hani Rifai",
+                "Husary",
+                "Husary (Mujawwad)",
+                "Hudhaify",
+                "Ibrahim Akhdar",
+                "Maher Al Muaiqly",
+                "Minshawi",
+                "Minshawy (Mujawwad)",
+                "Muhammad Ayyoub",
+                "Muhammad Jibreel",
+                "Saood bin Ibraaheem Ash-Shuraym"
+            ];
+            const reciterData = await fetchData(`${API_BASE_URL}/edition/format/audio`);
+            if (reciterData && reciterData.data) {
+                const filteredReciters = reciterData.data.filter(reciter =>
+                    preferredReciters.includes(reciter.englishName)
+                );
+                reciterSelect.innerHTML = '';
+                filteredReciters.forEach(reciter => {            
+                    const option = document.createElement('option');
+                    option.value = reciter.identifier;
+                    option.textContent = reciter.englishName;
+                    reciterSelect.appendChild(option);
+                });
+            }
+
+            // Fetch all surahs
+            const surahData = await fetchData(`${API_BASE_URL}/surah`);
+            if (surahData) {
+                allSurahs.push(...surahData.data);
+                allSurahs.forEach(surah => {
+                    const option = document.createElement('option');
+                    option.value = surah.number;
+                    option.textContent = `${surah.number}. ${surah.englishName} (${surah.englishNameTranslation})`;
+                    surahSelect.appendChild(option);
+                });
+
+                // Setting initial verse range for the first surah
+                const firstSurah = allSurahs[0];
+                if (firstSurah) {
+                    endVerseInput.value = firstSurah.numberOfAyahs;
+                    endVerseInput.max = firstSurah.numberOfAyahs;
+                }
+            }
+
+            loadingDiv.classList.add('hidden');
+            mainContentDiv.classList.remove('hidden');
+            updateButtonStates();
+        };
+
+        // Event listener for surah selection change
+        surahSelect.addEventListener('change', (e) => {
+            const selectedSurahNumber = parseInt(e.target.value);
+            const selectedSurah = allSurahs.find(s => s.number === selectedSurahNumber);
+            if (selectedSurah) {
+                const totalAyahs = selectedSurah.numberOfAyahs;
+                startVerseInput.max = totalAyahs;
+                endVerseInput.max = totalAyahs;
+
+                // Reset verse range to 1 to last verse of new surah
+                startVerseInput.value = 1;
+                endVerseInput.value = totalAyahs;
+            }
+        });
+
+        // Event listener for cumulative checkbox control (NEW LOGIC)
+        cumulativeRecitationCheckbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                lastRangeRepeatValue = parseInt(rangeRepeatCountInput.value) || 1;
+
+                // When Cumulative is checked, lock the range repeat to 1 and disable the input
+                rangeRepeatCountInput.value = 1;
+                rangeRepeatCountInput.disabled = true;
+                rangeRepeatCountInput.classList.add('bg-gray-200'); // Visual cue for disabled
+            } else {
+                // When unchecked, re-enable the input and restore the previous value
+                rangeRepeatCountInput.disabled = false;
+                rangeRepeatCountInput.value = lastRangeRepeatValue;
+                rangeRepeatCountInput.classList.remove('bg-gray-200');
+            }
+        });
+
+        // Save the value before it changes
+        rangeRepeatCountInput.addEventListener('change', () => {
+            if (!cumulativeRecitationCheckbox.checked) {
+                lastRangeRepeatValue = parseInt(rangeRepeatCountInput.value) || 1;
+            }
+        });
+
+
+        // Main playback logic
+        const playVerses = async () => {
+            if (isPaused) {
+                // Resume playback
+                isPaused = false;
+                if (currentAudio) currentAudio.play();
+                updateButtonStates();
+                return;
+            }
+
+            if (isPlaying) {
+                return;
+            }
+
+            isPlaying = true;
+            stopPlayback = false;
+            updateButtonStates();
+            currentVerseDisplay.classList.remove('hidden');
+            verseTextContainer.classList.remove('hidden');
+
+            const surahNumber = surahSelect.value;
+            const reciterIdentifier = reciterSelect.value;
+            const startVerse = parseInt(startVerseInput.value);
+            const endVerse = parseInt(endVerseInput.value);
+            const verseRepeatCount = parseInt(verseRepeatCountInput.value);
+            // Read rangeRepeatCount directly from the input, which is now controlled by the checkbox
+            const rangeRepeatCount = parseInt(rangeRepeatCountInput.value);
+            const playbackSpeed = parseFloat(playbackSpeedSelect.value);
+            const arabicScript = arabicScriptSelect.value;
+            const isCumulative = cumulativeRecitationCheckbox.checked;
+
+            // Set the correct font class based on the selected script
+            if (arabicScript === 'quran-uthmani') {
+                arabicTextSpan.classList.add('font-amiri');
+                arabicTextSpan.classList.remove('font-scheherazade');
+            } else if (arabicScript === 'quran-indopak') {
+                arabicTextSpan.classList.add('font-scheherazade');
+                arabicTextSpan.classList.remove('font-amiri');
+            }
+
+            if (isNaN(startVerse) || isNaN(endVerse) || startVerse > endVerse) {
+                console.error('Please enter a valid verse range.');
+                isPlaying = false;
+                updateButtonStates();
+                return;
+            }
+
+            let completedPlayback = true;
+
+            // Outer loop for repeating the entire range (Now this will be 1 if cumulative is checked)
+            for (let rangeRep = 0; rangeRep < rangeRepeatCount; rangeRep++) {
+                if (stopPlayback || isPaused) {
+                    completedPlayback = false;
+                    break;
+                }
+
+                // Loop through each verse in the selected range (Current Focus Verse)
+                for (let verse = startVerse; verse <= endVerse; verse++) {
+                    if (stopPlayback || isPaused) {
+                        completedPlayback = false;
+                        break;
+                    }
+
+                    // Repeat the core logic N times (based on verseRepeatCount)
+                    for (let i = 0; i < verseRepeatCount; i++) {
+                        if (stopPlayback || isPaused) {
+                            completedPlayback = false;
+                            break;
+                        }
+
+                        const versesToReciteInThisIteration = [];
+
+                        if (isCumulative && verse > startVerse) {
+                            // Cumulative mode and not the first verse:
+                            // On the FIRST pass (i=0), recite verses from startVerse up to (verse - 1) for context.
+                            if (i === 0) {
+                                for (let v = startVerse; v < verse; v++) {
+                                    versesToReciteInThisIteration.push(v);
+                                }
+                            }
+                            // Always add the current, focus verse 'verse' (this is the one we are repeating N times)
+                            versesToReciteInThisIteration.push(verse);
+
+                        } else {
+                            // Normal mode OR Cumulative mode on the first verse (where startVerse == verse)
+                            versesToReciteInThisIteration.push(verse);
+                        }
+
+                        // Execute recitation sequence
+                        for (const v of versesToReciteInThisIteration) {
+                            if (stopPlayback || isPaused) break;
+                            await playSingleVerse(v, surahNumber, reciterIdentifier, arabicScript, playbackSpeed);
+                        }
+                    }
+                }
+            }
+
+            // Implementation of the final "1 2 3" review pass (only runs if cumulative is checked AND range rep = 1)
+            if (completedPlayback && isCumulative) {
+                // If we completed all range repetitions and cumulative mode is on, perform a final review.
+                console.log("Starting final review pass.");
+                for (let verse = startVerse; verse <= endVerse; verse++) {
+                    if (stopPlayback || isPaused) break;
+                    await playSingleVerse(verse, surahNumber, reciterIdentifier, arabicScript, playbackSpeed);
+                }
+            }
+
+
+            // Only stop if the loop completed, not if it was paused
+            if (!isPaused) {
+                stopAudio();
+            }
+        };
+
+        const pauseAudio = () => {
+            if (currentAudio) {
+                currentAudio.pause();
+            }
+            isPaused = true;
+            updateButtonStates();
+        };
+
+        const stopAudio = () => {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            isPlaying = false;
+            isPaused = false;
+            stopPlayback = true;
+            updateButtonStates();
+            currentVerseDisplay.classList.add('hidden');
+            verseTextContainer.classList.add('hidden');
+        };
+
+        // Add event listeners for control buttons
+        playBtn.addEventListener('click', playVerses);
+        pauseBtn.addEventListener('click', pauseAudio);
+        stopBtn.addEventListener('click', stopAudio);
+
+        // Initial setup
+        initializeApp();
+    </script>
+</body>
+
+</html>
